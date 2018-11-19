@@ -13,10 +13,10 @@ from lib import utils, metrics
 from lib.AMSGrad import AMSGrad
 from lib.metrics import masked_mae_loss
 
-from model.dcrnn_model import DCRNNModel
+from model.gcrnn_model import GCRNNModel
 
 
-class DCRNNSupervisor(object):
+class GCRNNSupervisor(object):
     """
     Do experiments using Graph Random Walk RNN model.
     """
@@ -44,14 +44,14 @@ class DCRNNSupervisor(object):
         # Build models.
         scaler = self._data['scaler']
         with tf.name_scope('Train'):
-            with tf.variable_scope('DCRNN', reuse=False):
-                self._train_model = DCRNNModel(is_training=True, scaler=scaler,
+            with tf.variable_scope('GCRNN', reuse=False):
+                self._train_model = GCRNNModel(is_training=True, scaler=scaler,
                                                batch_size=self._data_kwargs['batch_size'],
                                                adj_mx=adj_mx, **self._model_kwargs)
 
         with tf.name_scope('Test'):
-            with tf.variable_scope('DCRNN', reuse=True):
-                self._test_model = DCRNNModel(is_training=False, scaler=scaler,
+            with tf.variable_scope('GCRNN', reuse=True):
+                self._test_model = GCRNNModel(is_training=False, scaler=scaler,
                                               batch_size=self._data_kwargs['test_batch_size'],
                                               adj_mx=adj_mx, **self._model_kwargs)
 
@@ -110,11 +110,13 @@ class DCRNNSupervisor(object):
             horizon = kwargs['model'].get('horizon')
             filter_type = kwargs['model'].get('filter_type')
             filter_type_abbr = 'L'
-            if filter_type == 'random_walk':
-                filter_type_abbr = 'R'
-            elif filter_type == 'dual_random_walk':
-                filter_type_abbr = 'DR'
-            run_id = 'dcrnn_%s_%d_h_%d_%s_lr_%g_bs_%d_%s/' % (
+            # if filter_type == 'random_walk':
+            #     filter_type_abbr = 'R'
+            # elif filter_type == 'dual_random_walk':
+            #     filter_type_abbr = 'DR'
+            if filter_type == 'dual_first_order':
+                filter_type_abbr = 'DF'
+            run_id = 'gcrnn_%s_%d_h_%d_%s_lr_%g_bs_%d_%s/' % (
                 filter_type_abbr, max_diffusion_step, horizon,
                 structure, learning_rate, batch_size,
                 time.strftime('%m%d%H%M%S'))
@@ -302,9 +304,6 @@ class DCRNNSupervisor(object):
         :return:
         """
         self._saver.restore(sess, model_filename)
-        # for var in tf.trainable_variables():
-        #     res = sess.run(tf.get_default_graph().get_tensor_by_name(var.name))
-        #     self._logger.debug('{}, {}, {}'.format(var.name, var.get_shape(), res))
 
     def save(self, sess, val_loss):
         config = dict(self._kwargs)

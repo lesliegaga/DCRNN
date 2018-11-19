@@ -125,6 +125,19 @@ def calculate_scaled_laplacian(adj_mx, lambda_max=2, undirected=True):
     L = (2 / lambda_max * L) - I
     return L.astype(np.float32)
 
+def calculate_first_order_matrix(adj_mx, undirected=False):
+    if undirected:
+        adj_mx = np.maximum.reduce([adj_mx, adj_mx.T])
+    adj = sp.coo_matrix(adj_mx)
+    d = np.array(adj.sum(1))
+    d_inv = np.power(d, -1).flatten()
+    d_inv[np.isinf(d_inv)] = 0.
+    d_mat_inv = sp.diags(d_inv)
+    adj_hat = sp.eye(adj.shape[0]) + adj
+    first_order_mx = d_mat_inv.dot(adj_hat).tocoo()
+    # first_order_mx = sp.csr_matrix(first_order_mx)
+    # return L.astype(np.float32)
+    return first_order_mx
 
 def config_logging(log_dir, log_filename='info.log', level=logging.INFO):
     # Add file handler and stdout handler
