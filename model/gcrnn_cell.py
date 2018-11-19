@@ -163,7 +163,7 @@ class GCGRUCell(RNNCell):
                 if x is None:
                     x = tf.expand_dims(x1, axis=0)
                 else:
-                    self._concat(x, x1)
+                    x = self._concat(x, x1)
 
 
             # if self._max_diffusion_step == 0:

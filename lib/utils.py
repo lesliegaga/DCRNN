@@ -133,7 +133,7 @@ def calculate_first_order_matrix(adj_mx, undirected=False):
     d_inv = np.power(d, -1).flatten()
     d_inv[np.isinf(d_inv)] = 0.
     d_mat_inv = sp.diags(d_inv)
-    adj_hat = sp.eye(adj.shape[0]) + adj
+    adj_hat = sp.eye(adj.shape[0], dtype=adj.dtype) + adj
     first_order_mx = d_mat_inv.dot(adj_hat).tocoo()
     # first_order_mx = sp.csr_matrix(first_order_mx)
     # return L.astype(np.float32)
