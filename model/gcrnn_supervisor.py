@@ -204,6 +204,7 @@ class GCRNNSupervisor(object):
             sess.run(tf.global_variables_initializer())
         self._logger.info('Start training ...')
 
+        self._writer.add_graph(sess.graph)
         while self._epoch <= epochs:
             # Learning rate schedule.
             new_lr = max(min_learning_rate, base_lr * (lr_decay_ratio ** np.sum(self._epoch >= np.array(steps))))

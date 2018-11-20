@@ -96,10 +96,13 @@ class DCGRUCell(RNNCell):
                 r, u = tf.split(value=value, num_or_size_splits=2, axis=-1)
                 r = tf.reshape(r, (-1, self._num_nodes * self._num_units))
                 u = tf.reshape(u, (-1, self._num_nodes * self._num_units))
+                tf.summary.histogram("hist_r", r)
+                tf.summary.histogram("hist_u", u)
             with tf.variable_scope("candidate"):
                 c = self._gconv(inputs, r * state, self._num_units)
                 if self._activation is not None:
                     c = self._activation(c)
+                tf.summary.histogram("hist_c", c)
             output = new_state = u * state + (1 - u) * c
             if self._num_proj is not None:
                 with tf.variable_scope("projection"):
@@ -107,6 +110,8 @@ class DCGRUCell(RNNCell):
                     batch_size = inputs.get_shape()[0].value
                     output = tf.reshape(new_state, shape=(-1, self._num_units))
                     output = tf.reshape(tf.matmul(output, w), shape=(batch_size, self.output_size))
+                    tf.summary.histogram("hist_w", w)
+                    tf.summary.tensor_summary("w", w)
         return output, new_state
 
     @staticmethod
@@ -180,5 +185,9 @@ class DCGRUCell(RNNCell):
             biases = tf.get_variable("biases", [output_size], dtype=dtype,
                                      initializer=tf.constant_initializer(bias_start, dtype=dtype))
             x = tf.nn.bias_add(x, biases)
+            tf.summary.histogram("hist_weights", weights)
+            tf.summary.histogram("hist_biases", biases)
+            tf.summary.tensor_summary("weights", weights)
+            tf.summary.tensor_summary("biases", biases)
         # Reshape res back to 2D: (batch_size, num_node, state_dim) -> (batch_size, num_node * state_dim)
         return tf.reshape(x, [batch_size, self._num_nodes * output_size])
