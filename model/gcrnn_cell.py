@@ -114,7 +114,7 @@ class GCGRUCell(RNNCell):
                     output = tf.reshape(new_state, shape=(-1, self._num_units))
                     output = tf.reshape(tf.matmul(output, w), shape=(batch_size, self.output_size))
                     tf.summary.histogram("hist_w", w)
-                    tf.summary.tensor_summary("w", w)
+                    # tf.summary.tensor_summary("w", w)
         return output, new_state
 
     @staticmethod
@@ -199,7 +199,7 @@ class GCGRUCell(RNNCell):
             x = tf.nn.bias_add(x, biases)
             tf.summary.histogram("hist_weights", weights)
             tf.summary.histogram("hist_biases", biases)
-            tf.summary.tensor_summary("weights", weights)
-            tf.summary.tensor_summary("biases", biases)
+            # tf.summary.tensor_summary("weights", weights)
+            # tf.summary.tensor_summary("biases", biases)
         # Reshape res back to 2D: (batch_size, num_node, state_dim) -> (batch_size, num_node * state_dim)
         return tf.reshape(x, [batch_size, self._num_nodes * output_size])
